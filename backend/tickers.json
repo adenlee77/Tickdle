@@ -1,0 +1,14 @@
+[
+  { "ticker": "AAPL",  "company": "Apple Inc." },
+  { "ticker": "MSFT",  "company": "Microsoft Corp." },
+  { "ticker": "AMZN",  "company": "Amazon.com, Inc." },
+  { "ticker": "NVDA",  "company": "NVIDIA Corporation" },
+  { "ticker": "GOOGL", "company": "Alphabet Inc. (Class A)" },
+  { "ticker": "GOOG",  "company": "Alphabet Inc. (Class C)" },
+  { "ticker": "META",  "company": "Meta Platforms, Inc." },
+  { "ticker": "TSLA",  "company": "Tesla, Inc." },
+  { "ticker": "BRK.B", "company": "Berkshire Hathaway Inc. Class B" },
+  { "ticker": "JPM",   "company": "JPMorgan Chase & Co." },
+  { "ticker": "V",     "company": "Visa Inc." },
+  { "ticker": "MA",    "company": "Mastercard Incorporated" }
+]
