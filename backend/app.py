@@ -6,15 +6,22 @@ from services.hints import hints
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
 
-# Load config & secret key
-app.config.from_object(config)                  # expects MAX_GUESSES etc.
+# load config & secret key
+app.config.from_object(config)
 app.secret_key = getattr(config, "SECRET_KEY", "change-me")
+
+# check if all session variables are in place
+def _ensure_game():
+    session.setdefault("answer", app.config["DEFAULT_ANSWER"])
+    session.setdefault("guesses", 0)
+    session.setdefault("finished", False)
+    session.setdefault("won", False)
 
 @app.route("/start", methods=["POST"])
 def start():
     # TO DO: get random ticker for day
 
-    session["answer"] = app.config.DEFAULT_ANSWER
+    session["answer"] = app.config["DEFAULT_ANSWER"]
     session["guesses"] = 0
     session["finished"] = False
     session["won"] = False
@@ -30,6 +37,7 @@ def start():
 
 @app.route("/guess", methods=["POST"])
 def guess():
+    _ensure_game()
 
     # get the user input
     user_guess = request.get_json().get('ticker').upper()
@@ -59,8 +67,9 @@ def guess():
         print(f"[ERROR] Failed to get hints from {user_guess}: {e}")
         return jsonify({"ok": False, "error": {"code": "NO_HINTS", "message": str(e)}}), 500
 
-@app.route("/end", methods=["POST"])
+@app.route("/end")
 def end():
+    _ensure_game()
     return jsonify({"ok": True, "message": "Game Over"})
 
 @app.post("/reset")
@@ -69,4 +78,4 @@ def reset():
     return jsonify({"ok": True})
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)

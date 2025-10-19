@@ -1,4 +1,4 @@
-from data_provider import get_meta
+from .data_provider import get_meta
 
 def hints(user_guess, answer):
     user_meta, answer_meta = get_meta(user_guess), get_meta(answer)
