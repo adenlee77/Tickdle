@@ -70,7 +70,7 @@ def guess():
 @app.route("/end")
 def end():
     _ensure_game()
-    return jsonify({"ok": True, "message": "Game Over"})
+    return jsonify({"ok": True, "message": "Game Over", "win": session["won"], "guesses": session["guesses"]})
 
 @app.post("/reset")
 def reset():

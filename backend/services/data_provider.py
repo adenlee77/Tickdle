@@ -32,9 +32,9 @@ def get_meta(symbol: str) -> Dict:
             "Price": fast["lastPrice"],
             "Day High": fast["dayHigh"],
             "Day Low": fast["dayLow"],
-            "Average Volume": fast["averageVolume"],
+            "Average Volume": t.info["averageVolume"],
             "Market Cap": fast["marketCap"],
-            "Dividend Yield": fast["dividendYield"]
+            #"Dividend Yield": fast["dividendYield"]
         }
 
         _set_cached(symbol, meta)
