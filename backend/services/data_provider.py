@@ -27,7 +27,7 @@ def get_meta(symbol: str) -> Dict:
 
     try:
         t = yf.Ticker(symbol)
-        fast = t.get_fast_info
+        fast = t.get_fast_info()
         meta = {
             "Price": fast["lastPrice"],
             "Day High": fast["dayHigh"],
@@ -40,5 +40,5 @@ def get_meta(symbol: str) -> Dict:
         _set_cached(symbol, meta)
         return meta
     except Exception as e:
-        print(f"[WARn] yfinance failed to fetch for {symbol}: {e}")
-    
+        print(f"[WARN] yfinance failed to fetch for {symbol}: {e}")
+        raise ValueError("Invaid ticker symbol")
