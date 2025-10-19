@@ -62,7 +62,7 @@ def guess():
     # produce hints
     try:
         hint_data = hints(user_guess, answer)
-        return jsonify({"ok": True, "data": hint_data}), 200
+        return jsonify({"ok": True, "guesses left": int(app.config["MAX_GUESSES"]) - int(session["guesses"]), "data": hint_data}), 200
     except Exception as e:
         print(f"[ERROR] Failed to get hints from {user_guess}: {e}")
         return jsonify({"ok": False, "error": {"code": "NO_HINTS", "message": str(e)}}), 500
