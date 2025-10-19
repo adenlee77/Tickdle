@@ -4,14 +4,29 @@ import config
 from services.hints import hints
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, supports_credentials=True)
 
-GUESSES = 0 # temp for testing
-TODAY_ANSWER = "AAPL" # temp for testing
+# Load config & secret key
+app.config.from_object(config)                  # expects MAX_GUESSES etc.
+app.secret_key = getattr(config, "SECRET_KEY", "change-me")
 
 @app.route("/start", methods=["POST"])
 def start():
-    pass
+    # TO DO: get random ticker for day
+
+    session["answer"] = app.config.DEFAULT_ANSWER
+    session["guesses"] = 0
+    session["finished"] = False
+    session["won"] = False
+
+    return jsonify({
+        "ok": True,
+        "data": {
+            "guesses": session["guesses"],
+            "max_guesses": app.config["MAX_GUESSES"],
+        }
+    }), 200
+
 
 @app.route("/guess", methods=["POST"])
 def guess():
@@ -19,17 +34,26 @@ def guess():
     # get the user input
     user_guess = request.get_json().get('ticker').upper()
 
-    # increment guess count
-    global GUESSES
-    GUESSES += 1
+    # get session variables and increment guesses
+    answer = session["answer"]
+    session["guesses"] = 1 + int(session.get("guesses", 0))
+    guesses = session["guesses"]
 
-    # win/lose condition
-    if user_guess == TODAY_ANSWER or GUESSES >= app.config["MAX_GUESSES"]:
+    # win condition
+    if user_guess == answer:
+        session["won"] = True
+        session["finished"] = True
+        return redirect(url_for("end"))
+    
+    # lose condition
+    if guesses >= app.config["MAX_GUESSES"]:
+        session["won"] = False
+        session["finished"] = True
         return redirect(url_for("end"))
     
     # produce hints
     try:
-        hint_data = hints(user_guess, TODAY_ANSWER)
+        hint_data = hints(user_guess, answer)
         return jsonify({"ok": True, "data": hint_data}), 200
     except Exception as e:
         print(f"[ERROR] Failed to get hints from {user_guess}: {e}")
@@ -38,6 +62,11 @@ def guess():
 @app.route("/end", methods=["POST"])
 def end():
     return jsonify({"ok": True, "message": "Game Over"})
+
+@app.post("/reset")
+def reset():
+    session.clear()
+    return jsonify({"ok": True})
 
 if __name__ == "__main__":
     app.run()
