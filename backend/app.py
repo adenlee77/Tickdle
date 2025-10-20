@@ -6,7 +6,7 @@ from services.hints import hints
 from services.get_ticker import get_daily_ticker
 
 app = Flask(__name__)
-CORS(app, supports_credentials=True)
+CORS(app, supports_credentials=True, resources={r"/*": {"origins": "https://localhost:5173"}})
 
 # load config & secret key
 app.config.from_object(config)
@@ -18,6 +18,10 @@ def _ensure_game():
     session.setdefault("guesses", 0)
     session.setdefault("finished", False)
     session.setdefault("won", False)
+
+@app.route("/")
+def home():
+    return "<h1>hi</h1>"
 
 @app.route("/start", methods=["POST"])
 def start():
