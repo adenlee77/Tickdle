@@ -7,7 +7,7 @@ import config
 import secrets
 
 TICKERS_FILE = "tickers.json"
-DAILY_TICKER_SECRET = getattr(config, "SECRET_KEY", secrets.token_hex(32))
+DAILY_TICKER_SECRET = getattr(config, "DAILY_TICKER_SECRET", secrets.token_hex(32))
 LOCAL_TZ = ZoneInfo("America/Toronto")
 ANCHOR_DATE = getattr(config, "ANCHOR_DATE")
 
