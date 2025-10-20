@@ -1,27 +1,28 @@
 from flask import Flask, request, jsonify, redirect, url_for, session
 from flask_cors import CORS
 import config
+import secrets
 from services.hints import hints
+from services.get_ticker import get_daily_ticker
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
 
 # load config & secret key
 app.config.from_object(config)
-app.secret_key = getattr(config, "SECRET_KEY", "change-me")
+app.secret_key = getattr(config, "SECRET_KEY", secrets.token_hex(32))
 
 # check if all session variables are in place
 def _ensure_game():
-    session.setdefault("answer", app.config["DEFAULT_ANSWER"])
+    session.setdefault("answer", get_daily_ticker())
     session.setdefault("guesses", 0)
     session.setdefault("finished", False)
     session.setdefault("won", False)
 
 @app.route("/start", methods=["POST"])
 def start():
-    # TO DO: get random ticker for day
-
-    session["answer"] = app.config["DEFAULT_ANSWER"]
+    daily_ticker = get_daily_ticker()
+    session["answer"] = daily_ticker
     session["guesses"] = 0
     session["finished"] = False
     session["won"] = False
@@ -31,6 +32,7 @@ def start():
         "data": {
             "guesses": session["guesses"],
             "max_guesses": app.config["MAX_GUESSES"],
+            "ticker": get_daily_ticker(),
         }
     }), 200
 
@@ -72,7 +74,7 @@ def end():
     _ensure_game()
     return jsonify({"ok": True, "message": "Game Over", "win": session["won"], "guesses": session["guesses"]})
 
-@app.post("/reset")
+@app.route("/reset", methods=["POST"])
 def reset():
     session.clear()
     return jsonify({"ok": True})
