@@ -6,7 +6,7 @@ from services.hints import hints
 from services.get_ticker import get_daily_ticker
 
 app = Flask(__name__)
-CORS(app, supports_credentials=True, resources={r"/*": {"origins": "https://localhost:5173"}})
+CORS(app, supports_credentials=True, resources={r"/api/*": {"origins": "http://localhost:5173"}})
 
 # load config & secret key
 app.config.from_object(config)
@@ -19,11 +19,11 @@ def _ensure_game():
     session.setdefault("finished", False)
     session.setdefault("won", False)
 
-@app.route("/")
+@app.route("/api")
 def home():
     return "<h1>hi</h1>"
 
-@app.route("/start", methods=["POST"])
+@app.route("/api/start", methods=["POST"])
 def start():
     daily_ticker = get_daily_ticker()
     session["answer"] = daily_ticker
@@ -41,7 +41,7 @@ def start():
     }), 200
 
 
-@app.route("/guess", methods=["POST"])
+@app.route("/api/guess", methods=["POST"])
 def guess():
     _ensure_game()
 
