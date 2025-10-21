@@ -1,44 +1,36 @@
-import time
+import redis
 import yfinance as yf
-from typing import Optional, Dict
+import json
+from config import REDIS_URL, CACHE_TTL
 
-CACHE_TTL = 600
-_cache: Dict[str, Dict] = {}
+r = redis.from_url(REDIS_URL, decode_responses=True)
 
-def _get_cached(symbol: str) -> Optional[Dict]:
-    rec = _cache.get(symbol)
-    if not rec:
-        return None
-    if time.time() - rec["ts"] > CACHE_TTL:
-        _cache.pop(symbol, None)
-        return None
-    return rec["data"]
-
-
-def _set_cached(symbol: str, data: Dict):
-    _cache[symbol] = {"data": data, "ts": time.time()}
-
-
-def get_meta(symbol: str) -> Dict:
+def get_meta(symbol: str):
     symbol = symbol.upper()
-    cached = _get_cached(symbol)
+    key = f"meta:{symbol}"
+
+    # try Redis cache
+    cached = r.get(key)
     if cached:
-        return cached
+        return json.loads(cached)
 
+    # fetch fresh data
+    t = yf.Ticker(symbol)
+    fast = t.get_fast_info()
+    info = {}
     try:
-        t = yf.Ticker(symbol)
-        fast = t.get_fast_info()
-        meta = {
-            "Price": fast["lastPrice"],
-            "Day High": fast["dayHigh"],
-            "Day Low": fast["dayLow"],
-            "Average Volume": t.info["averageVolume"],
-            "Market Cap": fast["marketCap"],
-            #"Dividend Yield": fast["dividendYield"]
-        }
+        info = t.info
+    except Exception:
+        pass
 
-        _set_cached(symbol, meta)
-        return meta
-    except Exception as e:
-        print(f"[WARN] yfinance failed to fetch for {symbol}: {e}")
-        raise ValueError("Invaid ticker symbol")
+    meta = {
+        "Price": fast.get("lastPrice"),
+        "Day High": fast.get("dayHigh"),
+        "Day Low": fast.get("dayLow"),
+        "Average Volume": info.get("averageVolume"),
+        "Market Cap": fast.get("marketCap"),
+    }
+
+    # store result in Redis with TTL
+    r.setex(key, CACHE_TTL, json.dumps(meta))
+    return meta
