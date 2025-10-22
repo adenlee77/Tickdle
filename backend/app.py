@@ -19,7 +19,7 @@ def _ensure_game():
     session.setdefault("finished", False)
     session.setdefault("won", False)
 
-@app.route("/api")
+@app.route("/api", methods=["GET", "POST"])
 def home():
     return "<h1>hi</h1>"
 
@@ -84,4 +84,4 @@ def reset():
     return jsonify({"ok": True})
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="localhost", port=5000, debug=True)
