@@ -73,12 +73,12 @@ def guess():
         print(f"[ERROR] Failed to get hints from {user_guess}: {e}")
         return jsonify({"ok": False, "error": {"code": "NO_HINTS", "message": str(e)}}), 500
 
-@app.route("/end")
+@app.route("/api/end", methods=["POST"])
 def end():
     _ensure_game()
     return jsonify({"ok": True, "message": "Game Over", "win": session["won"], "guesses": session["guesses"]})
 
-@app.route("/reset", methods=["POST"])
+@app.route("/api/reset", methods=["POST"])
 def reset():
     session.clear()
     return jsonify({"ok": True})
