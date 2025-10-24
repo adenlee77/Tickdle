@@ -19,9 +19,10 @@ def _ensure_game():
     session.setdefault("finished", False)
     session.setdefault("won", False)
 
-@app.route("/api", methods=["GET", "POST"])
-def home():
-    return "<h1>hi</h1>"
+# if user refreshes on the frontend /play url it redirects them to start over
+@app.route("/play")
+def return_home():
+    return redirect("/")
 
 @app.route("/api/start", methods=["POST"])
 def start():

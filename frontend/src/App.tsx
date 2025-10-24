@@ -13,22 +13,19 @@ export default function App() {
       const res = await fetch("/api/start", {
         method: "POST",
         credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({})
       });
-
-      const ct = res.headers.get("content-type") || "";
-      const data = ct.includes("application/json") ? await res.json() : await res.text();
       if (!res.ok) {
-        throw new Error(typeof data === "string" ? data : (data?.error || "Failed to start"));
+        const msg = await res.text();
+        throw new Error(msg || "Failed to start");
       }
-
+      // implement navigate("/play")
     } catch (err: any) {
       setStatus(`Error: ${err?.message || "Could not start the game"}`);
     } finally {
       setLoading(false);
     }
   }
+
 
   return (
     <div className="bg">
