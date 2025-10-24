@@ -37,7 +37,7 @@ export default function App() {
 
       <main className="wrap" role="main">
         <h1 className="title">Tickdle</h1>
-        <p className="sub">Guess today’s stock in as few tries as possible. One challenge. New ticker daily.</p>
+        <p className="sub">Guess today’s stock in as few tries as possible. New ticker daily.</p>
         <button className="btn" onClick={startGame} disabled={loading} aria-busy={loading}>
           {loading ? "Starting…" : "Start Game"}
         </button>
