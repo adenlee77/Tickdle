@@ -46,16 +46,22 @@ def start():
 def chart():
     _ensure_game()
     ticker = session["answer"]
-
     url = f"https://finviz.com/chart.ashx?t={ticker}&p=d"
 
+    # needed to make finviz request to look like a browser request
+    headers = {
+        "User-Agent": "Mozilla/5.0",
+        "Referer": "https://finviz.com/",
+        "Accept": "image/avif,image/webp,image/apng,image/*,*/*;q=0.8",
+    }
+
     try:
-        r = requests.get(url, timeout=10)
-        if r.status_code != 200:
-            raise Exception(f"Bad status {r.status_code}")
-        
-        return Response(r.content, mimetype="image/png")
+        r = requests.get(url, headers=headers, timeout=10)
+        r.raise_for_status()
+        ctype = r.headers.get("Content-Type", "image/png")
+        return Response(r.content, mimetype=ctype)
     except Exception as e:
+        print(f"[ERROR] Chart fetch failed: {e}")
         return jsonify({"ok": False, "error": "CHART_FAILED"}), 500
 
 
