@@ -1,10 +1,12 @@
 import React from "react";
 import "./App.css";
 import bgUrl from "./assets/candlestick.jpeg";
+import { useNavigate } from "react-router-dom"
 
 export default function App() {
   const [loading, setLoading] = React.useState(false);
   const [status, setStatus] = React.useState<string>("");
+  const navigate = useNavigate();
 
   async function startGame() {
     setLoading(true);
@@ -18,7 +20,7 @@ export default function App() {
         const msg = await res.text();
         throw new Error(msg || "Failed to start");
       }
-      // implement navigate("/play")
+      navigate("/play")
     } catch (err: any) {
       setStatus(`Error: ${err?.message || "Could not start the game"}`);
     } finally {
