@@ -1,5 +1,6 @@
-from flask import Flask, request, jsonify, redirect, url_for, session
+from flask import Flask, request, jsonify, redirect, url_for, session, Response
 from flask_cors import CORS
+import requests
 import config
 import secrets
 from services.hints import hints
@@ -40,6 +41,22 @@ def start():
             "ticker": get_daily_ticker(),
         }
     }), 200
+
+@app.route("/api/chart", methods=["GET"])
+def chart():
+    _ensure_game()
+    ticker = session["answer"]
+
+    url = f"https://finviz.com/chart.ashx?t={ticker}&p=d"
+
+    try:
+        r = requests.get(url, timeout=10)
+        if r.status_code != 200:
+            raise Exception(f"Bad status {r.status_code}")
+        
+        return Response(r.content, mimetype="image/png")
+    except Exception as e:
+        return jsonify({"ok": False, "error": "CHART_FAILED"}), 500
 
 
 @app.route("/api/guess", methods=["POST"])
