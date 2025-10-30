@@ -29,54 +29,62 @@ export default function Play() {
   const [won, setWon] = React.useState<boolean | null>(null);
 
   async function submitGuess() {
-    const ticker = guess.trim().toUpperCase();
-    if (!ticker || finished) return;
+  const ticker = guess.trim().toUpperCase();
+  if (!ticker || finished) return;
 
-    setStatus("");
-    try {
-      const res = await fetch("/api/guess", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ticker }),
-      });
+  setStatus("");
+  try {
+    const res = await fetch("/api/guess", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ticker }),
+    });
 
-      const ctype = res.headers.get("content-type") ?? "";
+    // invalid/nonexistent ticker
+    if (res.status === 422) {
+      const err = await res.json().catch(() => ({} as any));
+      setStatus(err?.error?.message || `Ticker "${ticker}" does not exist. Try again.`);
+      return;
+    }
 
-      if (ctype.includes("application/json")) {
-        const data: any = await res.json();
+    const ctype = res.headers.get("content-type") ?? "";
 
-        if (data?.ok && data?.data) {
-          setRows((prev) => [{ ticker, hints: data.data as HintMap }, ...prev]);
-          const left = typeof data["guesses left"] === "number" ? data["guesses left"] : null;
-          setTriesLeft(left);
-          if (left !== null && left <= 0) {
-            await endState();
-          }
-        } else if (data?.ok && typeof data?.win === "boolean") {
-          handleEnd(data.win, Number(data.guesses ?? rows.length));
-        } else {
-          await endState();
-        }
-      } else {
-        await endState();
+    // surface error text, keep playing
+    if (!res.ok) {
+      const text = await res.text();
+      setStatus(text || `Request failed (${res.status})`);
+      return;
+    }
+
+    // ok guess
+    if (ctype.includes("application/json")) {
+      const data: any = await res.json();
+
+      // keep playing (valid wrong guess)
+      if (data?.ok && data?.data && typeof data["guesses left"] === "number") {
+        setRows((prev) => [{ ticker, hints: data.data as HintMap }, ...prev]);
+        setTriesLeft(data["guesses left"]);
+        setGuess("");
+        setStatus("");
+        return;
       }
-      setGuess("");
-    } catch (e: any) {
-      setStatus(e?.message || "Guess failed.");
-    }
-  }
 
-  async function endState() {
-    try {
-      const r = await fetch("/api/end", { method: "POST", credentials: "include" });
-      const d: any = await r.json().catch(() => ({}));
-      if (d?.ok) handleEnd(Boolean(d.win), Number(d.guesses ?? rows.length));
-      else setFinished(true);
-    } catch {
-      setFinished(true);
+      // game ended (either via redirect to /api/end or server returned end JSON)
+      if (data?.ok && typeof data?.win === "boolean") {
+        handleEnd(Boolean(data.win), Number(data.guesses ?? rows.length));
+        setGuess("");
+        return;
+      }
+
+      // any other JSON shape. show message, keep playing
+      setStatus(data?.error?.message || "Guess failed.");
+      return;
     }
+  } catch (e: any) {
+    setStatus(e?.message || "Network error.");
   }
+}
 
   function handleEnd(win: boolean, _total: number) {
     setFinished(true);

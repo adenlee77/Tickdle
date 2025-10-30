@@ -3,6 +3,7 @@ from flask_cors import CORS
 import requests
 import config
 import secrets
+import yfinance as yf
 from services.hints import hints
 from services.get_ticker import get_daily_ticker
 
@@ -19,6 +20,16 @@ def _ensure_game():
     session.setdefault("guesses", 0)
     session.setdefault("finished", False)
     session.setdefault("won", False)
+
+# check if ticker exists
+def ticker_exists(symbol: str) -> bool:
+    try:
+        ticker = yf.Ticker(symbol)
+        info = ticker.info
+        # 'shortName' exists for valid tickers; for bad ones, info is often empty or minimal
+        return bool(info and info.get("shortName"))
+    except Exception:
+        return False
 
 # if user refreshes on the frontend /play url it redirects them to start over
 @app.route("/play")
@@ -69,33 +80,49 @@ def chart():
 def guess():
     _ensure_game()
 
-    # get the user input
-    user_guess = request.get_json().get('ticker').upper()
+    payload = request.get_json(silent=True) or {}
+    user_guess = (payload.get("ticker") or "").strip().upper()
+    if not user_guess:
+        return jsonify({"ok": False, "error": {"code": "EMPTY_TICKER", "message": "Ticker is required."}}), 400
 
-    # get session variables and increment guesses
     answer = session["answer"]
-    session["guesses"] = 1 + int(session.get("guesses", 0))
-    guesses = session["guesses"]
 
-    # win condition
+    # validate ticker existence
+    if not ticker_exists(user_guess):
+        return jsonify({
+            "ok": False,
+            "error": {"code": "INVALID_TICKER", "message": f"Ticker '{user_guess}' does not exist."}
+        }), 422
+
+    # win
     if user_guess == answer:
+        session["guesses"] = int(session.get("guesses", 0)) + 1
         session["won"] = True
         session["finished"] = True
         return redirect(url_for("end"))
-    
-    # lose condition
+
+    # build hints. if this fails (e.g., no ticker), dont consume a guess.
+    try:
+        hint_data = hints(user_guess, answer)
+    except Exception as e:
+        print(f"[ERROR] Failed to get hints from {user_guess}: {e}")
+        return jsonify({"ok": False, "error": {"code": "NO_HINTS", "message": str(e)}}), 500
+
+    # valid (but wrong) guess
+    session["guesses"] = int(session.get("guesses", 0)) + 1
+    guesses = session["guesses"]
+
+    # lose
     if guesses >= app.config["MAX_GUESSES"]:
         session["won"] = False
         session["finished"] = True
         return redirect(url_for("end"))
-    
-    # produce hints
-    try:
-        hint_data = hints(user_guess, answer)
-        return jsonify({"ok": True, "guesses left": int(app.config["MAX_GUESSES"]) - int(session["guesses"]), "data": hint_data}), 200
-    except Exception as e:
-        print(f"[ERROR] Failed to get hints from {user_guess}: {e}")
-        return jsonify({"ok": False, "error": {"code": "NO_HINTS", "message": str(e)}}), 500
+
+    return jsonify({
+        "ok": True,
+        "guesses left": int(app.config["MAX_GUESSES"]) - guesses,
+        "data": hint_data
+    }), 200
 
 @app.route("/api/end", methods=["POST"])
 def end():
