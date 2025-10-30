@@ -104,9 +104,23 @@ def guess():
     # build hints. if this fails (e.g., no ticker), dont consume a guess.
     try:
         hint_data = hints(user_guess, answer)
+    # case where we subtract something from none (will happen if no data can be got for a field)
+    except TypeError as e:
+        print(f"[ERROR] Hints TypeError for {user_guess}: {e}")
+        return jsonify({
+            "ok": False,
+            "error": {"code": "INCOMPLETE_DATA", "message": f"Ticker '{user_guess}' is missing data. Try another ticker."}
+        }), 422
     except Exception as e:
         print(f"[ERROR] Failed to get hints from {user_guess}: {e}")
         return jsonify({"ok": False, "error": {"code": "NO_HINTS", "message": str(e)}}), 500
+    
+    required = ("price", "day_high", "day_low", "avg_volume", "market_cap")
+    if any(hint_data.get(k) is None for k in required):
+        return jsonify({
+            "ok": False,
+            "error": {"code": "INCOMPLETE_DATA", "message": f"Ticker '{user_guess}' is missing data. Try another ticker."}
+        }), 422
 
     # valid (but wrong) guess
     session["guesses"] = int(session.get("guesses", 0)) + 1
@@ -117,8 +131,6 @@ def guess():
         session["won"] = False
         session["finished"] = True
         return redirect(url_for("end"))
-    
-    print("[DEBUG hints() returned]", hint_data)
 
     return jsonify({
         "ok": True,
