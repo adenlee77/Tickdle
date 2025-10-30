@@ -72,7 +72,7 @@ export default function Play() {
 
       // game ended (either via redirect to /api/end or server returned end JSON)
       if (data?.ok && typeof data?.win === "boolean") {
-        handleEnd(Boolean(data.win), Number(data.guesses ?? rows.length));
+        handleEnd(Boolean(data.win), Number(data.guesses ?? rows.length), Number(data["guesses left"]));
         setGuess("");
         return;
       }
@@ -86,11 +86,11 @@ export default function Play() {
   }
 }
 
-  function handleEnd(win: boolean, _total: number) {
+  function handleEnd(win: boolean, _total: number, left: number) {
     setFinished(true);
     setWon(win);
     setStatus(win ? "You got it! 🎉" : "Out of guesses. Try again tomorrow.");
-    setTriesLeft(0);
+    setTriesLeft(left);
   }
 
   function Tile({ label, val }: { label: string; val: number | undefined }) {
@@ -120,7 +120,7 @@ export default function Play() {
       <header className="gameHeader">
         <button className="btnGhost" onClick={() => navigate("/")}>← Home</button>
         <h1 className="gameTitle">Tickdle</h1>
-        <div className="tries">{triesLeft == null ? "" : `${triesLeft} guesses left`}</div>
+        <div className="tries">{triesLeft === null || triesLeft === undefined ? "" : `${triesLeft} guesses left`}</div>
       </header>
 
       <div className="chartMask">

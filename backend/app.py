@@ -124,10 +124,17 @@ def guess():
         "data": hint_data
     }), 200
 
-@app.route("/api/end", methods=["POST"])
+@app.route("/api/end", methods=["GET", "POST"])
 def end():
     _ensure_game()
-    return jsonify({"ok": True, "message": "Game Over", "win": session["won"], "guesses": session["guesses"]})
+    left = int(app.config["MAX_GUESSES"]) - int(session.get("guesses", 0))
+    return jsonify({
+        "ok": True,
+        "message": "Game Over",
+        "win": session["won"],
+        "guesses": session["guesses"],
+        "guesses left": left
+    })
 
 @app.route("/api/reset", methods=["POST"])
 def reset():
