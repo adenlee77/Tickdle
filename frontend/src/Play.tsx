@@ -112,7 +112,7 @@ export default function Play() {
       <header className="gameHeader">
         <button className="btnGhost" onClick={() => navigate("/")}>← Home</button>
         <h1 className="gameTitle">Tickdle</h1>
-        <div className="tries">{triesLeft == null ? "" : `${triesLeft} left`}</div>
+        <div className="tries">{triesLeft == null ? "" : `${triesLeft} guesses left`}</div>
       </header>
 
       <div className="chartMask">
