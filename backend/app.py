@@ -117,6 +117,8 @@ def guess():
         session["won"] = False
         session["finished"] = True
         return redirect(url_for("end"))
+    
+    print("[DEBUG hints() returned]", hint_data)
 
     return jsonify({
         "ok": True,

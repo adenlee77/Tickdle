@@ -10,9 +10,9 @@ def hints(user_guess, answer):
     compare_market_cap = user_meta["Market Cap"] - answer_meta["Market Cap"]
 
     return {
-        "price_diff": compare_price,
-        "day_high_diff": compare_day_high,
-        "day_low_diff": compare_day_low,
-        "average_volume_diff": compare_average_volume,
-        "market_cap_diff": compare_market_cap,
+        "price": compare_price,
+        "day_high": compare_day_high,
+        "day_low": compare_day_low,
+        "avg_volume": compare_average_volume,
+        "market_cap": compare_market_cap,
     }
