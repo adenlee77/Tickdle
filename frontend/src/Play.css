@@ -1,172 +1,189 @@
+:root {
+  --bg: #242424;
+  --tile-green: #2e7d32;
+  --tile-red: #c62828;
+  --tile-gray: #424242;
+  --tile-border: rgba(255, 255, 255, 0.08);
+}
+
 .game {
-  min-height: 100dvh;
-  display: grid;
-  grid-template-rows: auto auto auto 1fr;
-  gap: 20px;
-  padding: 32px 20px 40px;
-  place-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px;
+  background-color: var(--bg);
+  min-height: 100vh;
+  color: #fff;
 }
 
 .gameHeader {
-  width: min(900px, 92vw);
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  display: flex;
   align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 640px;
+  margin-bottom: 24px;
 }
 
 .btnGhost {
-  justify-self: start;
-  padding: 10px 14px;
-  border-radius: 999px;
-  background: transparent;
-  border: 1px solid rgba(255,255,255,0.25);
-  color: #fff;
+  background: none;
+  border: none;
+  color: #ccc;
+  font-size: 16px;
+  cursor: pointer;
+  font-weight: 500;
 }
 
 .gameTitle {
-  margin: 0;
+  font-size: 36px;
+  font-weight: 800;
   text-align: center;
-  font-size: clamp(28px, 4vw, 40px);
-  letter-spacing: 1px;
+  flex-grow: 1;
 }
 
 .tries {
-  justify-self: end;
-  opacity: 0.8;
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+  padding: 8px 14px;
+  border-radius: 10px;
+  text-align: center;
+  min-width: 70px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 
-/* chart */
-.chartCard {
-  width: min(900px, 92vw);
-  border-radius: 16px;
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.06);
-  padding: 12px;
-  backdrop-filter: blur(4px);
+.chartMask {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  overflow: hidden;
+  border-radius: 18px;
+  background-color: var(--bg);
+  margin-bottom: 20px;
 }
+
+.chartMask::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: var(--bg);
+  height: 18px;
+  border-top-left-radius: 18px;
+  border-top-right-radius: 18px;
+  z-index: 2;
+}
+
 .chartBig {
+  display: block;
   width: 100%;
   height: auto;
-  display: block;
-  border-radius: 12px;
+  border-radius: 18px;
+  object-fit: cover;
 }
 
-/* input */
 .inputRow {
-  width: min(900px, 92vw);
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 10px;
-}
-.bigInput {
-  padding: 16px 18px;
-  border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.22);
-  background: rgba(0,0,0,0.35);
-  color: #fff;
-  font-size: clamp(16px, 2.4vw, 20px);
-  letter-spacing: 1px;
-}
-.bigBtn {
-  padding: 16px 22px;
-  border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.22);
-  background: rgba(255,255,255,0.12);
-  color: #fff;
-  font-weight: 600;
-  font-size: clamp(16px, 2.4vw, 20px);
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  width: 100%;
+  max-width: 640px;
 }
 
-/* board */
+.bigInput {
+  flex: 1;
+  padding: 14px 16px;
+  font-size: 16px;
+  border-radius: 12px;
+  border: none;
+  outline: none;
+}
+
+.bigBtn {
+  padding: 14px 20px;
+  border-radius: 12px;
+  border: none;
+  background: #111;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.banner {
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+
 .board {
-  width: min(900px, 92vw);
-  display: grid;
-  gap: 10px;
-}
-.row {
-  display: grid;
-  grid-template-columns: 96px 1fr;
-  gap: 10px;
+  display: flex;
+  flex-direction: column;
   align-items: center;
+  width: 100%;
+  max-width: 720px;
 }
-.rowLabel {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: clamp(18px, 2.6vw, 22px);
-  text-align: center;
-  padding: 12px 10px;
-  border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.16);
-  background: rgba(255,255,255,0.06);
+
+.row {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
 }
 
 .tiles {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   gap: 10px;
 }
 
-.tile {
-  height: clamp(70px, 12vw, 96px);
-  display: grid;
-  place-items: center;
-  border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.16);
-  background: rgba(255,255,255,0.06);
-  font-size: clamp(18px, 2.8vw, 24px);
-  font-weight: 700;
+.tile,
+.tickerTile {
   position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: clamp(18px, 2.4vw, 22px);
+  text-align: center;
+  color: #fff;
+  border: 0 !important;
+  line-height: 1;
+  text-decoration: none;
+  box-shadow: 0 0 0 1px var(--tile-border);
+
+  width: 110px;
+  height: 80px;
+  flex-shrink: 0;
+}
+
+.tile.up {
+  background: var(--tile-green);
+}
+.tile.down {
+  background: var(--tile-red);
+}
+.tile.correct {
+  background: #1b5e20;
+}
+.tickerTile {
+  background: var(--tile-gray);
+  color: #fff;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
 }
 
 .tile .tHint {
   position: absolute;
-  bottom: 8px;
-  right: 10px;
-  font-size: 12px;
-  opacity: 0.8;
-  font-weight: 500;
+  top: 6px;
+  left: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  opacity: 0.9;
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
 }
 
-.tile.good { background: rgba(0,180,120,0.18); border-color: rgba(0,180,120,0.45); }
-.tile.warn { background: rgba(255,200,0,0.18); border-color: rgba(255,200,0,0.45); }
-.tile.bad  { background: rgba(255,70,70,0.18);  border-color: rgba(255,70,70,0.45); }
-
-.banner {
-  width: min(900px, 92vw);
-  text-align: center;
-  padding: 12px 14px;
-  border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.18);
-  background: rgba(255,255,255,0.08);
-}
-
-.muted { opacity: 0.75; text-align: center; padding: 12px 0; }
-
-/* cover ticker symbol in chart */
-.chartMask {
-  position: relative;
-  width: min(900px, 92vw);
-  margin-inline: auto;
-  overflow: hidden;
-  border-radius: 12px;
-}
-
-.chartMask > img.chartBig {
-  display: block;
-  width: 100%;
-  height: auto;
-  border-radius: 0;
-}
-
-.chartMask::after {
-  content: "";
-  position: absolute;
-  top: -2px;
-  left: -2px;
-  width: calc(100% + 4px);
-  height: clamp(36px, 8%, 52px);
-
-  background: #242424;
-
-  border-top-left-radius: 12px;
-  border-top-right-radius: 12px;
+.muted {
+  color: #999;
+  margin-top: 10px;
 }

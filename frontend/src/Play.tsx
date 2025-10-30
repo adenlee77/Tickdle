@@ -86,18 +86,26 @@ export default function Play() {
   }
 
   function Tile({ label, val }: { label: string; val: number | undefined }) {
-    if (val == null) return <div className="tile">–</div>;
-    if (Math.abs(val) < 1e-9) return <div className="tile good">✓<span className="tHint">{label}</span></div>;
-    const up = val < 0;
-    const pct = `${(Math.abs(val) * 100).toFixed(1)}%`;
-    const cls = Math.abs(val) <= 0.02 ? "tile good" : Math.abs(val) <= 0.05 ? "tile warn" : "tile bad";
+
+  if (val == null) return <div className="tile"><span className="tHint">{label}</span>–</div>;
+
+  if (Math.abs(val) < 1e-12) {
     return (
-      <div className={cls}>
-        {up ? "↑" : "↓"} {pct}
+      <div className="tile correct">
+        ✓
         <span className="tHint">{label}</span>
       </div>
     );
   }
+
+  const isUp = val < 0;
+  return (
+    <div className={`tile ${isUp ? "up" : "down"}`}>
+      {isUp ? "↑" : "↓"}
+      <span className="tHint">{label}</span>
+    </div>
+  );
+}
 
   return (
     <div className="game">
@@ -139,16 +147,19 @@ export default function Play() {
       <div className="board">
         {rows.length === 0 && <div className="muted">No guesses yet.</div>}
         {rows.map((r, i) => (
-          <div className="row" key={`${r.ticker}-${i}`}>
-            <div className="rowLabel">{r.ticker}</div>
+        <div className="row" key={`${r.ticker}-${i}`}>
             <div className="tiles">
-              <Tile label={STAT_LABELS.price}       val={r.hints.price} />
-              <Tile label={STAT_LABELS.day_high}    val={r.hints.day_high} />
-              <Tile label={STAT_LABELS.day_low}     val={r.hints.day_low} />
-              <Tile label={STAT_LABELS.avg_volume}  val={r.hints.avg_volume} />
-              <Tile label={STAT_LABELS.market_cap}  val={r.hints.market_cap} />
+            {}
+            <div className="tile tickerTile">
+                {r.ticker}
             </div>
-          </div>
+            <Tile label={STAT_LABELS.price}       val={r.hints.price} />
+            <Tile label={STAT_LABELS.day_high}    val={r.hints.day_high} />
+            <Tile label={STAT_LABELS.day_low}     val={r.hints.day_low} />
+            <Tile label={STAT_LABELS.avg_volume}  val={r.hints.avg_volume} />
+            <Tile label={STAT_LABELS.market_cap}  val={r.hints.market_cap} />
+            </div>
+        </div>
         ))}
       </div>
     </div>
